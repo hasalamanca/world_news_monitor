@@ -122,4 +122,3 @@ fig = px.choropleth(
 # Display the map
 fig.show()
 
-
