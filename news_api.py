@@ -1,16 +1,112 @@
 
+import requests
+import pandas as pd
+import os  #For saving local copies of the files
+from datetime import datetime #Publishing time to an easier to handle date time
 
-##Setting up the imports
 
-# API Key 0300f083ebd946b180af8a9bca9895c7
-#https://newsapi.org/docs/get-started
-#pip install newsapi-python
+def fetch_news_sources(api_key):
 
+    url = f"https://newsapi.org/v2/top-headlines/sources?apiKey={api_key}"
+
+    # Make the GET request
+    response = requests.get(url)
+
+    # Check if the request was successful
+    if response.status_code == 200:
+        # Parse the JSON response
+        data = response.json()
+        sources = data.get("sources", [])
+        
+        # Create and return a DataFrame
+        return pd.DataFrame(sources)
+    else:
+        # Handle errors
+        raise Exception(f"Error fetching data: {response.status_code}, {response.text}")
+
+
+
+def save_df_to_file(df, file_name):
+
+    # Ensure the file is saved in the local directory
+    file_path = os.path.join(os.getcwd(), file_name)
+    df.to_csv(file_path, index=False)
+    print(f"DataFrame saved to {file_path}")
+
+def load_df_from_file(file_name):
+
+    # Ensure the file is loaded from the local directory
+    file_path = os.path.join(os.getcwd(), file_name)
+    df = pd.read_csv(file_path)
+    print(f"DataFrame loaded from {file_path}")
+    return df
+
+
+def fetch_news_headlines(api_key, source_id):
+
+    url = f"https://newsapi.org/v2/top-headlines?sources={source_id}&apiKey={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        headlines = data.get("articles", [])  # Fetch headlines from the "articles" key
+        
+        # Convert to DataFrame
+        headlines_df = pd.DataFrame(headlines)
+        
+        # Replace 'source' with its 'id'
+        headlines_df['source'] = source_id
+        
+        # Drop unnecessary columns
+        headlines_df.drop(columns=['urlToImage', 'content'], inplace=True, errors='ignore')
+        
+        # Format 'publishedAt' to a readable datetime format
+        if 'publishedAt' in headlines_df.columns:
+            headlines_df['publishedAt'] = pd.to_datetime(headlines_df['publishedAt']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        
+        return headlines_df
+    else:
+        raise Exception(f"Error fetching headlines for {source_id}: {response.status_code}, {response.text}")
+
+
+
+
+
+
+
+################################################################
+
+api_key = "0300f083ebd946b180af8a9bca9895c7"
+
+##I get the data and save the most updated version.
+#df = fetch_news_sources(api_key)
+#save_df_to_file(df, "news_sources.csv")
+
+##df = fetch_news_headlines(api_key, "abc-news")
+#save_df_to_file(df, "news_titles.csv")
+
+#I retrieve saved data
+df_news_sources= load_df_from_file("news_sources.csv")
+df_news_titles= load_df_from_file("news_titles.csv")
+
+
+print(df_news_sources)
+print(df_news_titles)
+
+
+
+
+
+"""
 
 from newsapi import NewsApiClient
 import pandas as pd
-import plotly.express as px
 import pycountry
+
+
+
+def summary_sources():
+    
+    return
 
 #Credentials
 
@@ -18,12 +114,16 @@ import pycountry
 
 newsapi = NewsApiClient(api_key='0300f083ebd946b180af8a9bca9895c7')
 
-""" # /v2/top-headlines
+# /v2/top-headlines
 top_headlines = newsapi.get_top_headlines(q='bitcoin',
                                           sources='bbc-news,the-verge',
                                           category='business',
                                           language='en',
                                           country='us')
+
+print(top_headlines)
+
+                                          
 
 # /v2/everything
 all_articles = newsapi.get_everything(q='bitcoin',
@@ -33,8 +133,11 @@ all_articles = newsapi.get_everything(q='bitcoin',
                                       to='2017-12-12',
                                       language='en',
                                       sort_by='relevancy',
-                                      page=2) """
+                                      page=2)
+"""
 
+
+"""
 # /v2/top-headlines/sources
 input_sources = newsapi.get_sources()
 
@@ -123,3 +226,5 @@ fig = px.choropleth(
 # Display the map
 fig.show()
 
+
+"""

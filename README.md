@@ -128,7 +128,3 @@ Database:
 
 7. **Verify the Sync**
    - Run the `git status` command again to ensure there are no pending changes.
-
----
-
-These instructions will help you set up and maintain synchronization with your GitHub repository seamlessly.
