@@ -113,7 +113,6 @@ Database:
      ```powershell
      git commit -m "Your commit message"
      ```
-   - Replace `"Your commit message"` with a description of the changes.
 
 5. **Pull the Latest Changes from GitHub**
    - Update your local repository with any changes from the remote repository:
