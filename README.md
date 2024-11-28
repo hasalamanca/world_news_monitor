@@ -1,23 +1,6 @@
 # world_news_monitor
 
-
-
-#Git Commands
-git clone https://github.com/hasalamanca/world_news_monitor.git
-cd .\world_news_monitor\
-git status
-git add main.py
-git push origin main
-git commit -m "Adding main .py"
-git config --global user.name "hasalamanca"
-git config --global user.email "hasalamanca@student.ie.edu"
-git push origin main
-git fetch
-git pull
-
-
-
-#Design of pieces
+#Project Design
 
 Make functions of all pieces.
 
@@ -50,3 +33,103 @@ CMND line implementation:
 
 Database:
 1) SQLite and/or Github solution to retrieve and push data. Only the large source table should be stored and the rest calculated when excecuting the program. Through the id we will need to update only the new entries to the DB.
+
+
+
+
+
+## Manual: Managing a GitHub Repository
+
+---
+
+### **Section 1: How to Install the Repository in a Given Folder**
+
+1. **Ensure Git is Installed**
+   - Verify Git is installed on your system by running:
+     ```powershell
+     git --version
+     ```
+   - If Git is not installed, download and install it from [git-scm.com](https://git-scm.com/).
+
+2. **Identify Yourself as a Git User**
+   - Set your name and email for Git commits:
+     ```powershell
+     git config --global user.name "YourFullName"
+     git config --global user.email "YourEmail@example.com"
+     ```
+   - Replace `"YourFullName"` and `"YourEmail@example.com"` with your name and email.
+
+3. **Navigate to the Desired Folder**
+   - Open PowerShell and move to the parent directory where you want to clone the repository:
+     ```powershell
+     cd "Path\To\Desired\Folder"
+     ```
+   - Replace `"Path\To\Desired\Folder"` with the folder’s path.
+
+4. **Clone the Repository**
+   - Run the following command to clone the repository into the folder:
+     ```powershell
+     git clone https://github.com/hasalamanca/world_news_monitor.git
+     ```
+   - The repository will be downloaded as a subfolder named `world_news_monitor` by default.
+
+5. **(Optional) Clone into a Specific Folder**
+   - If you want the repository in a specific folder, specify the target folder name:
+     ```powershell
+     git clone https://github.com/hasalamanca/world_news_monitor.git "C:\Path\To\Target\Folder"
+     ```
+
+6. **Navigate into the Repository Folder**
+   - After cloning, move into the repository directory:
+     ```powershell
+     cd "world_news_monitor"
+     ```
+
+---
+
+### **Section 2: How to Sync the Folder with GitHub**
+
+1. **Navigate to the Repository Folder**
+   - Ensure you are in the correct directory:
+     ```powershell
+     cd "Path\To\Repository\Folder"
+     ```
+   - Replace `"Path\To\Repository\Folder"` with your repository’s path.
+
+2. **Check the Status of the Repository**
+   - Review changes and ensure your local repository is up-to-date:
+     ```powershell
+     git status
+     ```
+
+3. **Stage All Changes**
+   - Add all modified or new files to the staging area:
+     ```powershell
+     git add .
+     ```
+
+4. **Commit the Changes**
+   - Save the staged changes to the local repository with a meaningful message:
+     ```powershell
+     git commit -m "Your commit message"
+     ```
+   - Replace `"Your commit message"` with a description of the changes.
+
+5. **Pull the Latest Changes from GitHub**
+   - Update your local repository with any changes from the remote repository:
+     ```powershell
+     git pull origin main
+     ```
+
+6. **Push Local Changes to GitHub**
+   - Send your committed changes to the remote repository:
+     ```powershell
+     git push origin main
+     ```
+
+7. **Verify the Sync**
+   - Run the `git status` command again to ensure there are no pending changes.
+
+---
+
+These instructions will help you set up and maintain synchronization with your GitHub repository seamlessly.
