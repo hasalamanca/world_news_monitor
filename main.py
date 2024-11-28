@@ -3,6 +3,7 @@
 ##Setting up the imports
 
 # API Key 0300f083ebd946b180af8a9bca9895c7
+#https://newsapi.org/docs/get-started
 #pip install newsapi-python
 
 
