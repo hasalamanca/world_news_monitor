@@ -25,6 +25,82 @@ def fetch_news_sources(api_key):
         raise Exception(f"Error fetching data: {response.status_code}, {response.text}")
 
 
+def fetch_news_headlines(api_key, source_id):
+
+    url = f"https://newsapi.org/v2/top-headlines?sources={source_id}&sortBy=publishedAt&apiKey={api_key}"
+    response = requests.get(url)
+    if response.status_code == 200:
+        data = response.json()
+        headlines = data.get("articles", [])  # Fetch headlines from the "articles" key
+        
+        # Convert to DataFrame
+        headlines_df = pd.DataFrame(headlines)
+        
+        # Replace 'source' with its 'id'
+        headlines_df['source'] = source_id
+        
+        # Drop unnecessary columns
+        headlines_df.drop(columns=['urlToImage', 'content'], inplace=True, errors='ignore')
+        
+        # Format 'publishedAt' to a readable datetime format
+        #if 'publishedAt' in headlines_df.columns:
+        #    headlines_df['publishedAt'] = pd.to_datetime(headlines_df['publishedAt']).dt.strftime('%Y-%m-%d %H:%M:%S')
+        
+        return headlines_df
+    else:
+        raise Exception(f"Error fetching headlines for {source_id}: {response.status_code}, {response.text}")
+
+
+def merge_main_news_table(sources_df, headlines_df):
+
+    # Rename 'id' in sources_df to 'source' for alignment with headlines_df
+    sources_df = sources_df.rename(columns={"id": "source"})
+    sources_df.drop(columns=['description', 'url'], inplace=True, errors='ignore')
+
+    # Perform the join
+    # Inner to secure the most integrity on the data included
+    combined_df = pd.merge(headlines_df, sources_df, on=["source", "name"], how="inner")
+
+    # Rename columns
+    combined_df = combined_df.rename(columns={"source": "source_id", "name": "source_name"})
+    
+    # Reorder the columns
+    column_order = [
+        "publishedAt",
+        "source_id",
+        "source_name",
+        'category',
+        "language",
+        "country",
+        "author",
+        "title",
+        "description",
+        "url"
+    ]
+    combined_df = combined_df[column_order]
+    
+    return combined_df
+
+
+
+def get_news_consolidates(api_key, sources_tracking, headlines_depot):
+    sources_df = fetch_news_sources(api_key)
+    headlines_df = pd.DataFrame()
+    for source in sources_df["id"]:    
+        if headlines_df.empty:
+            headlines_df = fetch_news_headlines(api_key, source)
+        else:
+            headlines_df = pd.concat([headlines_df, fetch_news_headlines(api_key, source)], ignore_index=True)
+    return merge_main_news_table(sources_df, headlines_df)
+
+
+
+
+
+
+
+
+################################################################
 
 def save_df_to_file(df, file_name):
 
@@ -41,58 +117,27 @@ def load_df_from_file(file_name):
     print(f"DataFrame loaded from {file_path}")
     return df
 
-
-def fetch_news_headlines(api_key, source_id):
-
-    url = f"https://newsapi.org/v2/top-headlines?sources={source_id}&apiKey={api_key}"
-    response = requests.get(url)
-    if response.status_code == 200:
-        data = response.json()
-        headlines = data.get("articles", [])  # Fetch headlines from the "articles" key
-        
-        # Convert to DataFrame
-        headlines_df = pd.DataFrame(headlines)
-        
-        # Replace 'source' with its 'id'
-        headlines_df['source'] = source_id
-        
-        # Drop unnecessary columns
-        headlines_df.drop(columns=['urlToImage', 'content'], inplace=True, errors='ignore')
-        
-        # Format 'publishedAt' to a readable datetime format
-        if 'publishedAt' in headlines_df.columns:
-            headlines_df['publishedAt'] = pd.to_datetime(headlines_df['publishedAt']).dt.strftime('%Y-%m-%d %H:%M:%S')
-        
-        return headlines_df
-    else:
-        raise Exception(f"Error fetching headlines for {source_id}: {response.status_code}, {response.text}")
-
-
-
-
-
-
-
 ################################################################
 
 api_key = "0300f083ebd946b180af8a9bca9895c7"
+
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
+
 
 ##I get the data and save the most updated version.
 #df = fetch_news_sources(api_key)
 #save_df_to_file(df, "news_sources.csv")
 
-##df = fetch_news_headlines(api_key, "abc-news")
+#df = fetch_news_headlines(api_key, "abc-news")
 #save_df_to_file(df, "news_titles.csv")
 
 #I retrieve saved data
-df_news_sources= load_df_from_file("news_sources.csv")
-df_news_titles= load_df_from_file("news_titles.csv")
+#df_news_sources= load_df_from_file("news_sources.csv")
+#df_news_titles= load_df_from_file("news_titles.csv")
 
 
-print(df_news_sources)
-print(df_news_titles)
-
-
+save_df_to_file(get_news_consolidates(api_key), "full_db_sample.csv")
 
 
 

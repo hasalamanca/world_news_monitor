@@ -2,13 +2,15 @@
 
 #Project Design
 
-Make functions of all pieces.
+News API: https://newsapi.org/docs
 
-1) Retrieve news headlines and store them
+Data manipulation:
 
-2) Generate master table describing: id, headline, country, outlet, category.
+1) Retrieve news headlines. OK 
 
-3) Translate headline to english, attach result to table as headline_eng
+2) Generate master table with all structured data describing at least: id, headline, country, outlet. OK Sample Provided
+
+3) Translate headline to english, attach result to table as headline_eng.
 
 4) Headline sentiment analysis, identify sentiment categories and attach result as a column to the table as sentiment_category.
 
