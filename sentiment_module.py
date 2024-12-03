@@ -1,18 +1,11 @@
 # sentiment_module.py
+#pip install vaderSentiment
 
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
 def analyze_sentiments(df):
-    """
-    Analyzes the sentiment of combined 'title' and 'description' columns in a DataFrame.
-
-    Parameters:
-    - df: pandas DataFrame with 'title' and 'description' columns.
-
-    Returns:
-    - df: pandas DataFrame with an added 'sentiment' column containing sentiment scores.
-    """
+    
     # Initialize the VADER sentiment analyzer
     analyzer = SentimentIntensityAnalyzer()
 

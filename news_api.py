@@ -1,4 +1,8 @@
 
+##Setting up the imports
+#https://newsapi.org/docs/get-started
+#pip install newsapi-python
+
 import requests
 import pandas as pd
 import os  #For saving local copies of the files
@@ -15,10 +19,10 @@ def save_df_to_file(df, file_name):
     # Check if the file already exists
     if os.path.exists(file_path):
         # Append to the file without writing the header
-        df.to_csv(file_path, mode="a", index=False, header=False)
+        df.to_csv(file_path, mode="a", index=False, header=False, encoding="utf-8") ##, sep=';')
     else:
         # Write the file with the header if it doesn't exist
-        df.to_csv(file_path, index=False, encoding="utf-8")
+        df.to_csv(file_path, index=False, encoding="utf-8") ##, sep=';')
     
     print(f"DataFrame saved to {file_path}")
 
@@ -28,7 +32,7 @@ def load_df_from_file(file_name):
 
     # Ensure the file is loaded from the local directory
     file_path = os.path.join(os.getcwd(), file_name)
-    df = pd.read_csv(file_path)
+    df = pd.read_csv(file_path, encoding='utf-8') ## , sep=';')
 
     print(f"DataFrame loaded from {file_path}")
     return df
@@ -38,7 +42,7 @@ def append_row_to_csv(file_name, new_row):
     new_row_df = pd.DataFrame([new_row])
     
     # Append the new row to the CSV file
-    new_row_df.to_csv(file_name, mode='a', header=False, index=False)
+    new_row_df.to_csv(file_name, mode='a', header=False, index=False, encoding='utf-8') #, sep=';')
 
 def fetch_news_sources(api_key):
     
@@ -136,7 +140,6 @@ def format_main_news_table(sources_df, headlines_df):
 
     combined_df = combined_df[column_order]
 
-    combined_df['sentiment_score'] = None
     combined_df['title_eng'] = None
     combined_df['description_eng'] = None
 
@@ -151,13 +154,16 @@ def sources_to_download(sources_tracking_file_name, api_key):
     except:
         print("No tracking file found. Creating a new one.")
         sources_tracking = pd.DataFrame(columns=['id', 'timestamp'])
-    sources_tracking = sources_tracking['id'].value_counts().reset_index()
+    print("Sources tracking: ", sources_tracking) ##Debugging
     sources_tracking.columns = ['id', 'count']
-    
+    print("Sources tracking: ", sources_tracking) ##Debugging
+    sources_tracking = sources_tracking['id'].value_counts().reset_index()
+
     try:
         sources_df_original = fetch_news_sources(api_key)
     except:
-        raise Exception("Error fetching sources") 
+        raise Exception("Error fetching sources.\nThe free service allows 100 requests per day.\nPlease try to update later.")
+
 
     sources_df = sources_df_original['id']
                             
@@ -178,7 +184,7 @@ def get_more_news(api_key: str, sources_list: list, sources_df: pd.DataFrame, he
     headlines_df = pd.DataFrame()
     
     # Iterate over each row in sources_df
-    for source_id in sources_list:  
+    for source_id in sources_list[:2]:  
         try:
             # Fetch headlines for the current source
             new_headlines = fetch_news_headlines(api_key, source_id)
@@ -217,7 +223,12 @@ def get_more_news(api_key: str, sources_list: list, sources_df: pd.DataFrame, he
     final_df.drop_duplicates(subset=["publishedAt", "title"], keep="first", inplace=True)
 
     # Save the final consolidated DataFrame to the CSV file
-    save_df_to_file(final_df, headlines_repo)
+    try:
+        save_df_to_file(final_df, headlines_repo)
+    except Exception as e:
+        print(f"Error saving consolidated news: {e}")
+        save_df_to_file(final_df, headlines_repo + "backup")
+        return print("Consolidated news saved on backup file.")
 
     print("Consolidated news saved successfully.")
     return merged_df
@@ -225,21 +236,10 @@ def get_more_news(api_key: str, sources_list: list, sources_df: pd.DataFrame, he
 
 ################################################################
 
-api_key = "0300f083ebd946b180af8a9bca9895c7"
 
-script_dir = os.path.dirname(os.path.abspath(__file__))
-os.chdir(script_dir)
-
-sources_traking_file_name = "sources_tracking.csv"
-headlines_repo_file_name = "headlines_repo.csv"
-
-
-try:
-    sources_list, sources_df = sources_to_download(sources_traking_file_name, api_key)
-    get_more_news(api_key, sources_list, sources_df, headlines_repo_file_name, sources_traking_file_name)
-except Exception as e:
-    print(f"Error fetching news: {e}")
-
-#Clean non existent
-#Make sure all alphabets are processed
+#api_key = "0300f083ebd946b180af8a9bca9895c7"
+#sources_traking_file_name = "sources_tracking.csv"
+#headlines_repo_file_name = "headlines_repo.csv"
+#sources_list, sources_df = sources_to_download(sources_traking_file_name, api_key)
+#get_more_news(api_key, sources_list, sources_df, headlines_repo_file_name, sources_traking_file_name)
 

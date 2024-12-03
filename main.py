@@ -1,125 +1,74 @@
+#pip install vaderSentiment
+#pip install googletrans==4.0.0-rc1
+#pip install dash, plotly, pycountry
 
+import os
+from sentiment_module import analyze_sentiments
+from news_api import * #import functions from news_api
+from visualization import run_dashboard
 
-##Setting up the imports
+api_key = "0300f083ebd946b180af8a9bca9895c7"
 
-# API Key 0300f083ebd946b180af8a9bca9895c7
-#https://newsapi.org/docs/get-started
-#pip install newsapi-python
+## Update news titles and identify their source and country.
+#This needs to run automatically every day to update the panel.
+script_dir = os.path.dirname(os.path.abspath(__file__))
+os.chdir(script_dir)
 
+sources_traking_file_name = "sources_tracking.csv"
+headlines_repo_file_name = "headlines_repo.csv"
+headlines_repo_sentiment_file_name = "headlines_repo_sentiment.csv"
 
-from newsapi import NewsApiClient
-import pandas as pd
-import plotly.express as px
-import pycountry
+input("Before we start, please close all excel files and press enter to continue...")
 
-#Credentials
+try:
+    sources_list, sources_df = sources_to_download(sources_traking_file_name, api_key)
+    print("Sources retreived")
+    get_more_news(api_key, sources_list, sources_df, headlines_repo_file_name, sources_traking_file_name)
+except Exception as e:
+    print(f"Error raised: {e}")
+    
 
-## Using the API to get the data
+## This is the master table to which we will add the metrics and filters we want so see more info on.
+print("Retrieving data for analysis...")
+headlines_repo =load_df_from_file(headlines_repo_file_name) #This function comes from news api in case later we decide to change the origin of the news db
 
-newsapi = NewsApiClient(api_key='0300f083ebd946b180af8a9bca9895c7')
-
-""" # /v2/top-headlines
-top_headlines = newsapi.get_top_headlines(q='bitcoin',
-                                          sources='bbc-news,the-verge',
-                                          category='business',
-                                          language='en',
-                                          country='us')
-
-# /v2/everything
-all_articles = newsapi.get_everything(q='bitcoin',
-                                      sources='bbc-news,the-verge',
-                                      domains='bbc.co.uk,techcrunch.com',
-                                      from_param='2017-12-01',
-                                      to='2017-12-12',
-                                      language='en',
-                                      sort_by='relevancy',
-                                      page=2) """
-
-# /v2/top-headlines/sources
-input_sources = newsapi.get_sources()
-
-
-## Process the data for a readable output and set the master table.
-
-sources = input_sources['sources']
-
-# Create a list to hold the table data
-table_data = []
-
-# Iterate over each source and extract 'country', 'language', 'name'
-for source in sources:
-    country = source.get('country', '')
-    language = source.get('language', '')
-    name = source.get('name', '')
-    table_data.append({'Country': country, 'Language': language, 'Name': name})
-
-# Using pandas to work on df
-
-df = pd.DataFrame(table_data)
-
-# Count the number of sources per country
-country_counts = df['Country'].value_counts().reset_index()
-country_counts.columns = ['Country', 'Number of Sources']
-
-# Display the summary table
-print("\nSummary Table of Sources per Country:")
-print(country_counts)
-
-#This is the master table to which we will add the metrics and filters we want so see more info on.
 
 ## Function to translate text from any language to english
 
-## Get news titles and identify their source, country and category
 
-## Find sentiment analysis tools we can use to create metrics to measure: Excitement, Alarm, Unemotional, Fear, etc.
+## Sentiment analysis tool
+# Display the DataFrame with sentiment scores
+headlines_repo = analyze_sentiments(headlines_repo)
+print(headlines_repo)
 
-## Schedule the process to run periodically, add a time stamp and identify the way the history of the analysis can be stored.
+# Optionally, save the results to a new CSV file
+file_path = os.path.join(os.getcwd(), headlines_repo_sentiment_file_name)
+headlines_repo.to_csv(file_path, index=False)
+print("Sentiment analysis completed. Results saved to 'headlines_repo_sentiment.csv'.")
+
+## Schedule the process to run periodically and use command line or equivalent
 
 ## UI work, how to smartly add filter, buttons to search for keywords, consider time period average of the metrics at display, etc. Could be a google sheets.
 
+run_dashboard(headlines_repo)
+
+
 ## Create a choropleth map
 
-##Ensure command line execution
-
-##*classes and modules
-
-# Convert country codes to ISO-3 (3-letter country codes)
-def iso2_to_iso3(iso2):
-    try:
-        return pycountry.countries.get(alpha_2=iso2.upper()).alpha_3
-    except:
-        return None
-
-# Apply the conversion to the 'Country' column
-df['ISO-3'] = df['Country'].apply(iso2_to_iso3)
-
-# Remove entries with invalid or missing ISO-3 codes
-df = df.dropna(subset=['ISO-3'])
-
-# Create a summary table of sources per country
-country_counts = df['ISO-3'].value_counts().reset_index()
-country_counts.columns = ['Country', 'Number of Sources']
-
-# Sentiment analysis, create values that add importance
+#Prepare visualization
+# Load the data
+# Set the working directory to the script's directory
 
 
-#
 
-# Adding country names for better readability
-iso3_to_name = {country.alpha_3: country.name for country in pycountry.countries}
-country_counts['Country Name'] = country_counts['Country'].map(iso3_to_name)
 
-# Create the choropleth map using Plotly Express
-fig = px.choropleth(
-    country_counts,
-    locations='Country',
-    color='Number of Sources',
-    hover_name='Country Name',
-    color_continuous_scale=px.colors.sequential.Plasma,
-    projection='natural earth',
-    title='World News Panel'
-)
+##To Solve:
+##Sentiment must read from title and description in english
+##Sentiment must only update empty rows
+## Decide where or how we use command line
+##Code is excecuting twice
+##Remove gibberish
+##black out empty data in the map
 
-# Display the map
-fig.show()
+
 
