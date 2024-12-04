@@ -39,7 +39,7 @@ headlines_repo =load_df_from_file(headlines_repo_file_name) #This function comes
 ## Sentiment analysis tool
 # Display the DataFrame with sentiment scores
 headlines_repo = analyze_sentiments(headlines_repo)
-print(headlines_repo)
+#print(headlines_repo)
 
 # Optionally, save the results to a new CSV file
 file_path = os.path.join(os.getcwd(), headlines_repo_sentiment_file_name)

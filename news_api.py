@@ -122,7 +122,7 @@ def format_main_news_table(sources_df, headlines_df):
     # Rename columns
     combined_df = combined_df.rename(columns={"source": "source_id", "name": "source_name"})
 
-    print("Combined df columns (pre order): ", combined_df.columns)
+    #print("Combined df columns (pre order): ", combined_df.columns)
 
     # Reorder the columns
     column_order = [
@@ -154,9 +154,9 @@ def sources_to_download(sources_tracking_file_name, api_key):
     except:
         print("No tracking file found. Creating a new one.")
         sources_tracking = pd.DataFrame(columns=['id', 'timestamp'])
-    print("Sources tracking: ", sources_tracking) ##Debugging
+    #print("Sources tracking: ", sources_tracking) ##Debugging
     sources_tracking.columns = ['id', 'count']
-    print("Sources tracking: ", sources_tracking) ##Debugging
+    #print("Sources tracking: ", sources_tracking) ##Debugging
     sources_tracking = sources_tracking['id'].value_counts().reset_index()
 
     try:
@@ -184,7 +184,7 @@ def get_more_news(api_key: str, sources_list: list, sources_df: pd.DataFrame, he
     headlines_df = pd.DataFrame()
     
     # Iterate over each row in sources_df
-    for source_id in sources_list[:2]:  
+    for source_id in sources_list:  
         try:
             # Fetch headlines for the current source
             new_headlines = fetch_news_headlines(api_key, source_id)
