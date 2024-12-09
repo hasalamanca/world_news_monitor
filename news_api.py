@@ -10,8 +10,7 @@ from datetime import datetime #Publishing time to an easier to handle date time
 
 def save_df_to_file(df, file_name):
     print("Saving DataFrame to file...")
-    print(file_name)
-    print(df.columns)
+    #print(df.columns)
     
     # Ensure the file is saved in the local directory
     file_path = os.path.join(os.getcwd(), file_name)
@@ -27,14 +26,14 @@ def save_df_to_file(df, file_name):
     print(f"DataFrame saved to {file_path}")
 
 def load_df_from_file(file_name):
-    print("Loading DataFrame from file...")
-    print(file_name)
 
     # Ensure the file is loaded from the local directory
     file_path = os.path.join(os.getcwd(), file_name)
+    print(f"Loading DataFrame from {file_path}")
+
     df = pd.read_csv(file_path, encoding='utf-8') ## , sep=';')
 
-    print(f"DataFrame loaded from {file_path}")
+    print("DataFrame loaded successfully.")
     return df
 
 def append_row_to_csv(file_name, new_row):
@@ -50,7 +49,7 @@ def fetch_news_sources(api_key):
     
     url = f"https://newsapi.org/v2/top-headlines/sources?apiKey={api_key}"
 
-    print(url) 
+    #print(url) 
 
     # Make the GET request
     try:
@@ -67,7 +66,8 @@ def fetch_news_sources(api_key):
         # Create and return a DataFrame
         
         sources = pd.DataFrame(sources)
-        print(sources)
+        #print(sources)
+        print("Sources retreived")
         return sources
     
     else:
@@ -105,18 +105,15 @@ def fetch_news_headlines(api_key, source_id):
         raise Exception(f"Error fetching headlines for {source_id}: {response.status_code}, {response.text}")
 
 def format_main_news_table(sources_df, headlines_df):
+    #Function to merge sources and headlines and format like the previous table for an append
 
     print("format_main_news_table: Merging sources and headlines...")
-    print("Sources columns: ", sources_df.columns)
-    print("Headlines columns: ", headlines_df.columns) 
 
     # Rename 'id' in sources_df to 'source' for coherence with headlines_df
     sources_df = sources_df.rename(columns={"id": "source"})
     sources_df.drop(columns=['description', 'url'], inplace=True, errors='ignore')
 
-    print("Adjusted sources columns: ", sources_df.columns)
-    # Perform the join
-    # Inner to secure the most integrity on the data included
+    # Perform the join, inner to secure the most integrity on the data included
     combined_df = pd.merge(headlines_df, sources_df, on=["source"], how="inner")
 
     # Rename columns
@@ -142,8 +139,10 @@ def format_main_news_table(sources_df, headlines_df):
 
     combined_df['title_eng'] = None
     combined_df['description_eng'] = None
+    combined_df['description_eng'] = None
+    combined_df['sentiment'] = None
 
-    print("Final combined df columns: ", combined_df.columns)
+    #print("Final combined df columns: ", combined_df.columns)
     
     return combined_df
 
@@ -184,7 +183,7 @@ def get_more_news(api_key: str, sources_list: list, sources_df: pd.DataFrame, he
     headlines_df = pd.DataFrame()
     
     # Iterate over each row in sources_df
-    for source_id in sources_list:  
+    for source_id in sources_list[:2]:  
         try:
             # Fetch headlines for the current source
             new_headlines = fetch_news_headlines(api_key, source_id)
