@@ -84,7 +84,7 @@ def run_dashboard(df):
             return sentiment_per_country(df)
 
     # Run the app
-    app.run_server(debug=True)
+    app.run_server(debug=True, use_reloader=False)
 
 
 
