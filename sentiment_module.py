@@ -1,6 +1,3 @@
-# sentiment_module.py
-#pip install vaderSentiment
-
 import pandas as pd
 from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
 
@@ -33,7 +30,4 @@ def analyze_sentiments(df):
 
     # Optionally, drop the 'combined_text' column if it's no longer needed
     df.drop(columns=['combined_text'], inplace=True)
-
-    print(df)
-
     return df
