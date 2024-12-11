@@ -130,3 +130,12 @@ Database:
 
 7. **Verify the Sync**
    - Run the `git status` command again to ensure there are no pending changes.
+
+
+Command to update
+
+```python main.py update```
+
+Command to display dashboard
+
+```streamlit run main.py visualize```
