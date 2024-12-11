@@ -29,21 +29,22 @@ class NewsAPI:
         new_row_df = pd.DataFrame([new_row])
         new_row_df.to_csv(file_name, mode='a', header=False, index=False, encoding='utf-8')
 
-    def fetch_news_sources(self):
-        print("Fetching news sources...")
-        url = f"https://newsapi.org/v2/top-headlines/sources?apiKey={self.api_key}"
-        try:
-            response = requests.get(url)
-        except:
-            raise Exception("Error fetching sources")
-        if response.status_code == 200:
-            data = response.json()
-            sources = data.get("sources", [])
-            sources = pd.DataFrame(sources)
-            print("Sources retrieved")
-            return sources
-        else:
-            raise Exception(f"Error fetching data: {response.status_code}, {response.text}")
+    def fetch_news_sources(self, update=False):
+        if update:
+            print("Fetching news sources...")
+            url = f"https://newsapi.org/v2/top-headlines/sources?apiKey={self.api_key}"
+            try:
+                response = requests.get(url)
+            except:
+                raise Exception("Error fetching sources")
+            if response.status_code == 200:
+                data = response.json()
+                sources = data.get("sources", [])
+                sources = pd.DataFrame(sources)
+                print("Sources retrieved")
+                return sources
+            else:
+                raise Exception(f"Error fetching data: {response.status_code}, {response.text}")
 
     def fetch_news_headlines(self, source_id):
         print(f"Fetching headlines for {source_id}...")
@@ -84,7 +85,7 @@ class NewsAPI:
         combined_df['sentiment'] = None
         return combined_df
 
-    def sources_to_download(self):
+    def sources_to_download(self, update=False):
         try:
             sources_tracking = pd.read_csv(self.sources_tracking_file_name)
         except:
@@ -93,7 +94,10 @@ class NewsAPI:
         sources_tracking.columns = ['id', 'count']
         sources_tracking = sources_tracking['id'].value_counts().reset_index()
         try:
-            sources_df_original = self.fetch_news_sources()
+            if update:
+                sources_df_original = self.fetch_news_sources(update=True)
+            else:
+                sources_df_original = self.load_df_from_file("sources_repo.csv")
         except:
             raise Exception("Error fetching sources.\nThe free service allows 100 requests per day.\nPlease try to update later.")
         sources_df = sources_df_original['id']
@@ -101,15 +105,16 @@ class NewsAPI:
         sources_tracking['count'] = sources_tracking['count'].fillna(0)
         sources_tracking.sort_values(by='count', inplace=True, ascending=True, ignore_index=True)
         prioritized_sources_list = sources_tracking['id'].to_list()
+        self.save_df_to_file(sources_df_original, "sources_repo.csv")
         return prioritized_sources_list, sources_df_original
 
-    def get_more_news(self):
+    def get_more_news(self, number_of_sources=5):
         print("Getting more news...")
         sources_list, sources_df = self.sources_to_download()
         print("Sources list: ", sources_list)
         print("headlines_repo: ", self.headlines_repo)
         headlines_df = pd.DataFrame()
-        for source_id in sources_list[:2]:
+        for source_id in sources_list[:number_of_sources]:
             try:
                 new_headlines = self.fetch_news_headlines(source_id)
                 new_row = {'id': source_id, 'timestamp': datetime.now().strftime('%Y-%m-%d %H:%M:%S')}

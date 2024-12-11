@@ -18,17 +18,15 @@ if __name__=="__main__":
         print("Please provide an option: 'update' or 'visualize'")
         sys.exit(1)
     
-    sources_traking_file_name = "sources_tracking.csv"
+    sources_tracking_file_name = "sources_tracking.csv"
     headlines_repo_file_name = "headlines_repo.csv"
 
-    news_api = nws.NewsAPI(api_key, headlines_repo_file_name, sources_traking_file_name)
+    news_api = nws.NewsAPI(api_key, headlines_repo_file_name, sources_tracking_file_name)
     
     ## This is the master table to which we will add the metrics and filters we want so see more info on.
     headlines_repo = news_api.load_df_from_file(headlines_repo_file_name) # Load the data
-    
-    sources_list, sources_df = news_api.sources_to_download()
-
     if sys.argv[1] == 'update':
+        sources_list, sources_df = news_api.sources_to_download(update=True)
         # Update news titles and identify their source and country.
         script_dir = os.path.dirname(os.path.abspath(__file__))
         os.chdir(script_dir)
@@ -54,6 +52,7 @@ if __name__=="__main__":
         ## Schedule the process to run periodically and use command line or equivalent
 
     elif sys.argv[1] == 'visualize':
+        sources_list, sources_df = news_api.sources_to_download()
         #Tables I would like to visualize nicely on the dashboard that can sort and filter
         print("1. List of sources per country")
         print(sources_df[["name", "country"]].sort_values(by="name").drop_duplicates())
@@ -100,14 +99,6 @@ If only could see all news outlets in one place... wait you can, look below!
 You can filter per country, news outlet, sort by sentiment and date."""
                         )
             st.dataframe(headlines_repo[["publishedAt","country", "source_id", "title_eng", "description_eng", "sentiment", "url"]].iloc[:100].sort_values(by="publishedAt", ascending=False))
-
-
-##To Solve:
-
-## Decide where and how we use command line
-##Code is excecuting twice 
-##Remove gibberish values
-##black out empty data in the map
 
 
 
