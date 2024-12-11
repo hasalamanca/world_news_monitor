@@ -6,8 +6,8 @@ from translate_to_eng import translate_headlines
 from sentiment_module import analyze_sentiments
 from dotenv import load_dotenv
 import streamlit as st
-from ADA_wordcloud import generate_wordcloud
-from ADA_sentiment_clusters import process_dataset_with_time_features
+from EDA_wordcloud import generate_wordcloud
+from EDA_sentiment_clusters import process_dataset_with_time_features
 
 load_dotenv()
 
