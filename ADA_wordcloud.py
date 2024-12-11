@@ -4,15 +4,10 @@ import matplotlib.pyplot as plt
 from nltk.corpus import stopwords
 import re
 import string
+import nltk
+nltk.download('stopwords')
 
-# Make sure to download the stopwords list if not already done
-# import nltk
-# nltk.download('stopwords')
-
-def generate_wordcloud(file_path):
-    # Load the dataset
-    df = pd.read_excel(file_path)
-
+def generate_wordcloud(df):
     # Parse 'publishedAt' column to datetime and handle missing values
     df['publishedAt'] = pd.to_datetime(df['publishedAt'], errors='coerce', utc=True)
     df = df.dropna(subset=['publishedAt'])
@@ -43,12 +38,8 @@ def generate_wordcloud(file_path):
     wordcloud = WordCloud(width=800, height=400, max_words=50, background_color='white').generate(filtered_text)
 
     # Display the word cloud
-    plt.figure(figsize=(10, 5))
-    plt.imshow(wordcloud, interpolation='bilinear')
-    plt.axis('off')
-    plt.title('Top 50 Keywords from the Last Month', fontsize=16)
-    plt.show()
-
-# Usage Example
-file_path = r"C:\Users\horac\OneDrive\Escritorio\headlines_repo.xlsx"
-generate_wordcloud(file_path)
+    # plt.figure(figsize=(10, 5))
+    # plt.imshow(wordcloud, interpolation='bilinear')
+    # plt.axis('off')
+    # plt.title('Top 50 Keywords from the Last Month', fontsize=16)
+    return wordcloud

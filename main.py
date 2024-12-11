@@ -6,6 +6,8 @@ from translate_to_eng import translate_headlines
 from sentiment_module import analyze_sentiments
 from dotenv import load_dotenv
 import streamlit as st
+from ADA_wordcloud import generate_wordcloud
+from ADA_sentiment_clusters import process_dataset_with_time_features
 
 load_dotenv()
 
@@ -69,7 +71,7 @@ if __name__=="__main__":
         st.set_page_config(layout="wide")
         st.title("World News Panel")
 
-        tab1, tab2, tab3 = st.tabs(["Unique Sources", "Average Sentiment", "News Table"])
+        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Unique Sources", "Average Sentiment", "News Table", "Keyword Cloud", "Sentiment Clusters"])
 
         with tab1:
             st.plotly_chart(vis.sources_per_country(headlines_repo), use_container_width=True)
@@ -77,6 +79,10 @@ if __name__=="__main__":
             st.plotly_chart(vis.sentiment_per_country(headlines_repo), use_container_width=True)
         with tab3:
             st.table(headlines_repo[["publishedAt","country", "source_id", "title_eng", "description_eng", "sentiment", "url"]].iloc[:100].sort_values(by="publishedAt", ascending=False))
+        with tab4:
+            st.image(generate_wordcloud(headlines_repo).to_image(), use_container_width=True)
+        with tab5:
+            st.plotly_chart(process_dataset_with_time_features(headlines_repo), use_container_width=True)
 
 
 ##To Solve:
