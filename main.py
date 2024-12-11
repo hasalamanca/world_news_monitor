@@ -69,20 +69,37 @@ if __name__=="__main__":
 
         # Create choropleth maps
         st.set_page_config(layout="wide")
-        st.title("World News Panel")
+        st.title("World News Monitor")
 
-        tab1, tab2, tab3, tab4, tab5 = st.tabs(["Unique Sources", "Average Sentiment", "News Table", "Keyword Cloud", "Sentiment Clusters"])
+        tab1, tab2, tab3 = st.tabs(["Home", "Sentiment", "News Panel"])
 
         with tab1:
+            st.markdown(
+"""Welcome to the world news monitor, the world wide panel where you can access more than one hundred outlets translated to english and evaluated according to their sentiment.
+
+You want to know what is going on, visit the World News Monitor, soon to be WNM.es"""
+                )
             st.plotly_chart(vis.sources_per_country(headlines_repo), use_container_width=True)
+            st.markdown("And we bring your favorite, our world trends:")
+            col1, col2, col3 = st.columns([2,4,2])
+            with col1:
+                st.write("")
+            with col2:
+                st.image(generate_wordcloud(headlines_repo).to_image())
+            with col3:
+                st.write("")
         with tab2:
+            st.markdown("News sentiment gives a powerful view of what people are being fed by the media. This can alter a nations mood and reflect different opinions versus the same topic. For example the US elections.")
             st.plotly_chart(vis.sentiment_per_country(headlines_repo), use_container_width=True)
-        with tab3:
-            st.table(headlines_repo[["publishedAt","country", "source_id", "title_eng", "description_eng", "sentiment", "url"]].iloc[:100].sort_values(by="publishedAt", ascending=False))
-        with tab4:
-            st.image(generate_wordcloud(headlines_repo).to_image(), use_container_width=True)
-        with tab5:
+            st.markdown("If we analyze how the news sentiment relates between different countries we can identify relevant clusters:")
             st.plotly_chart(process_dataset_with_time_features(headlines_repo), use_container_width=True)
+        with tab3:
+            st.markdown("""
+If only could see all news outlets in one place... wait you can, look below!
+
+You can filter per country, news outlet, sort by sentiment and date."""
+                        )
+            st.dataframe(headlines_repo[["publishedAt","country", "source_id", "title_eng", "description_eng", "sentiment", "url"]].iloc[:100].sort_values(by="publishedAt", ascending=False))
 
 
 ##To Solve:
