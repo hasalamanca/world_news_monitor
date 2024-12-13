@@ -108,7 +108,7 @@ class NewsAPI:
         self.save_df_to_file(sources_df_original, "sources_repo.csv")
         return prioritized_sources_list, sources_df_original
 
-    def get_more_news(self, number_of_sources=5):
+    def get_more_news(self, number_of_sources=10):
         print("Getting more news...")
         sources_list, sources_df = self.sources_to_download()
         print("Sources list: ", sources_list)
