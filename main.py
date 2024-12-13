@@ -8,6 +8,9 @@ from dotenv import load_dotenv
 import streamlit as st
 from EDA_wordcloud import generate_wordcloud
 from EDA_sentiment_clusters import process_dataset_with_time_features
+import warnings
+
+warnings.filterwarnings("ignore")
 
 load_dotenv()
 
@@ -78,7 +81,16 @@ if __name__=="__main__":
 
 You want to know what is going on, visit the World News Monitor, soon to be WNM.es"""
                 )
-            st.plotly_chart(vis.sources_per_country(headlines_repo), use_container_width=True)
+            col1, col2 = st.columns([2, 1])
+    
+            with col1:
+                st.plotly_chart(vis.sources_per_country(headlines_repo), use_container_width=True)
+            
+            with col2:
+                country_list = headlines_repo['country'].unique()
+                selected_country = st.selectbox("Select a country to filter sources:", country_list)
+                filtered_sources = headlines_repo[headlines_repo['country'] == selected_country][['source_name']].drop_duplicates()
+                st.dataframe(filtered_sources)
             st.markdown("And we bring your favorite, our world trends:")
             col1, col2, col3 = st.columns([2,4,2])
             with col1:
@@ -88,6 +100,15 @@ You want to know what is going on, visit the World News Monitor, soon to be WNM.
             with col3:
                 st.write("")
         with tab2:
+            col1, col2 = st.columns([1, 1])
+            with col1:
+                st.markdown("### Top 5 Positive Sentiment Countries")
+                top_5_positive = headlines_repo.groupby('country')['sentiment'].mean().sort_values(ascending=False).head(5).reset_index()
+                st.dataframe(top_5_positive)
+            with col2:
+                st.markdown("### Top 5 Negative Sentiment Countries")
+                bottom_5_negative = headlines_repo.groupby('country')['sentiment'].mean().sort_values(ascending=True).head(5).reset_index()
+                st.dataframe(bottom_5_negative)
             st.markdown("News sentiment gives a powerful view of what people are being fed by the media. This can alter a nations mood and reflect different opinions versus the same topic. For example the US elections.")
             st.plotly_chart(vis.sentiment_per_country(headlines_repo), use_container_width=True)
             st.markdown("If we analyze how the news sentiment relates between different countries we can identify relevant clusters:")
@@ -98,7 +119,19 @@ If only could see all news outlets in one place... wait you can, look below!
 
 You can filter per country, news outlet, sort by sentiment and date."""
                         )
-            st.dataframe(headlines_repo[["publishedAt","country", "source_id", "title_eng", "description_eng", "sentiment", "url"]].iloc[:100].sort_values(by="publishedAt", ascending=False))
-
-
+            country_list = headlines_repo['country'].unique()
+            source_list = headlines_repo['source_id'].unique()
+            
+            selected_country = st.selectbox("Select a country to filter news:", ['All'] + list(country_list))
+            selected_source = st.selectbox("Select a news source to filter news:", ['All'] + list(source_list))
+            
+            filtered_news = headlines_repo.dropna(subset=['publishedAt'])
+            
+            if selected_country != 'All':
+                filtered_news = filtered_news[filtered_news['country'] == selected_country]
+            
+            if selected_source != 'All':
+                filtered_news = filtered_news[filtered_news['source_id'] == selected_source]
+            
+            st.dataframe(filtered_news[["publishedAt","country", "source_id", "title_eng", "description_eng", "sentiment", "url"]].sort_values(by="publishedAt", ascending=False))
 
